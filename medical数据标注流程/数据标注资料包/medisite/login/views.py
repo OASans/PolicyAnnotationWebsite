@@ -502,7 +502,7 @@ def report(request):
             if id_no != []:
                 example_id = id_no[0]
             else:
-                return render(request, 'report.html', {'nowtext_id':'您已完成所有诊疗报告！'})
+                return render(request, 'report.html', {'nowtext_id':'您已完成所有诊疗报告！test'})
 
     
 
