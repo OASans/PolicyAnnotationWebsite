@@ -1,5 +1,6 @@
 import string
 from collections import Counter
+from django.utils.text import Truncator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
@@ -30,7 +31,7 @@ class Project(models.Model):
 
     def get_progress(self, user):
         docs = self.get_documents(is_null=True, user=user)
-        total = self.documents.count()
+        total = Document.objects.filter(policy_file__project=self).count()
         remaining = docs.count()
         return {'total': total, 'remaining': remaining}
 
@@ -44,7 +45,7 @@ class Project(models.Model):
         return template_name
 
     def get_documents(self, is_null=True, user=None):
-        docs = self.documents.all()
+        docs = Document.objects.filter(policy_file__project=self).all()
         if user:
             docs = docs.exclude(doc_annotations__user=user)
         else:
@@ -53,15 +54,11 @@ class Project(models.Model):
 
     def get_document_serializer(self):
         from .serializers import ClassificationDocumentSerializer
-        if self.is_type_of(Project.DOCUMENT_CLASSIFICATION):
-            return ClassificationDocumentSerializer
-        else:
-            raise ValueError('Invalid project_type')
+        return ClassificationDocumentSerializer
 
     def get_annotation_serializer(self):
         from .serializers import DocumentAnnotationSerializer
-        if self.is_type_of(Project.DOCUMENT_CLASSIFICATION):
-            return DocumentAnnotationSerializer
+        return DocumentAnnotationSerializer
 
     def get_annotation_class(self):
         return DocumentAnnotation
@@ -92,25 +89,30 @@ class Label(models.Model):
         )
 
 
-# class PolicyFile(models.Model):
-#     raw_text = models.TextField()
-#     project = models.ForeignKey(Project, related_name='documents', on_delete=models.CASCADE)
+# TODO: 新增model PolicyFile
+class PolicyFile(models.Model):
+    raw_text = models.TextField()
+    project = models.ForeignKey(Project, related_name='policy', on_delete=models.CASCADE)
+
+    def __str__(self):
+        truncated_content = Truncator(self.raw_text)
+        return truncated_content.chars(10)
 
 
 class Document(models.Model):
     text = models.TextField()
-    project = models.ForeignKey(Project, related_name='documents', on_delete=models.CASCADE)
+    policy_file = models.ForeignKey(PolicyFile, related_name='documents', on_delete=models.CASCADE, default=123)  # TODO
+    # project = models.ForeignKey(Project, related_name='documents', on_delete=models.CASCADE)
 
     def get_annotations(self):
-        if self.project.is_type_of(Project.DOCUMENT_CLASSIFICATION):
-            return self.doc_annotations.all()
+        return self.doc_annotations.all()
 
     def to_csv(self):
         return self.make_dataset_for_classification()
 
     def make_dataset_for_classification(self):
         annotations = self.get_annotations()
-        dataset = [[a.document.id, a.document.text, a.label.text, a.user.username]
+        dataset = [[a.policy.id, a.policy, a.document.id, a.document.text, a.label.text, a.user.username]
                    for a in annotations]
         return dataset
 
@@ -124,7 +126,8 @@ class Document(models.Model):
         annotations = self.get_annotations()
         labels = [a.label.text for a in annotations]
         username = annotations[0].user.username
-        dataset = {'doc_id': self.id, 'text': self.text,
+        dataset = {'policy_id': self.policy_file.id, 'policy_abstract': self.policy_file,
+                   'doc_id': self.id, 'text': self.text,
                    'labels': labels, 'username': username}
         return dataset
 
