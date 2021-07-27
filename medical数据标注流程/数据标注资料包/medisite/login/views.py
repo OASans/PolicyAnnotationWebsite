@@ -211,45 +211,149 @@ def logout(request):
     return redirect("/login/")
 
 
-# ========================================下面的还没写好==============================================================
-def check_report(request):
-    if not request.session.get('is_login', None):
-        return redirect("/login/")
-    reviewerid = request.session['userid']
-    lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-savedate')  # TODO
-    text_exist = lasttext.exists()
-    if not text_exist: #尚未开始标注
-        message = "您尚未开始标注!"
-        return render(request, 'check.html', {'message': message})
-    else:
-        message = "您标注过以下文本："
-        textlist = models.TagText.objects.filter(reviewer=reviewerid,sentence_id=1)
-        example_ids=[i.example_id for i in textlist]
-        reports = [i.report for i in textlist]
-        tagged =zip(example_ids, reports)
-
-        return render(request,'check1.html', {'tagged':tagged,'message': message})
-
-
 def check(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     reviewerid = request.session['userid']
-    lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-savedate')
+    lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid).order_by('-savedate')
     text_exist = lasttext.exists()
     if not text_exist: #尚未开始标注
         message = "您尚未开始标注!"
         return render(request, 'check.html', {'message': message})
     else: #已有标注记录
         message = "您标注过以下文本："
-        textlist = models.TagText.objects.filter(reviewer=reviewerid, sentence_id=1)#.order_by('savedate').values('sentence')
+        textlist = models.PolicySentenceTag.objects.filter(reviewer=reviewerid, sentence_id=1).order_by('-savedate')
         example_ids = [i.example_id for i in textlist]
         # unique_ids = [i.unique_id for i in textlist]
-        questions = [models.SelfReport.objects.get(example_id=i).question for i in example_ids]
-        diagnoses = [models.SelfReport.objects.get(example_id=i).diagnose for i in example_ids]
+        policies = [models.PolicyText.objects.get(example_id=i).text[0] for i in example_ids]
+        savetime = [models.PolicySentenceTag.objects.get(reviewer=reviewerid, sentence_id=1, example_id=i).savedate for i in example_ids]
 
-        tagged = zip(example_ids, questions,diagnoses)
+        tagged = zip(example_ids, policies, savetime)
         return render(request,'check.html', {'tagged':tagged,'message': message})
+
+
+@csrf_exempt
+def lookandmodify(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+
+    eid = request.POST.get('eid', None)
+
+    reviewer = request.session['userid']
+
+    TagData = models.PolicySentenceTag.objects.filter(example_id=eid, reviewer=reviewer)
+    cutted_text = [i.sentence for i in TagData]  # cutsent(nowtext)
+    uid = [i.unique_id for i in TagData]
+
+    label = []
+    for i in TagData:
+        try:
+            add_ = list(i.label)
+        except:
+            add_ = []
+        label.append(add_)
+
+    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[int(j)] for j in i])) for i in label]
+
+    acts = [i.sentence_tag for i in TagData]
+
+    cutted = zip(uid, cutted_text, acts, lenpos)
+
+    whole_policy = models.PolicyText.objects.get(example_id=eid).text
+
+    return render(request, 'policy_modify.html', {'whole_policy': whole_policy,
+                                               'nowtext_id': eid, 'cutted': cutted, 'sections_BIO': res1,
+                                               'sections_ACT': res2, 'lenpos': lenpos})
+
+
+@csrf_exempt
+def modifytag(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+    userid = request.session['userid']
+
+    if request.is_ajax():
+        example_id = request.POST.get('example_id', None)
+        sentence_id = request.POST.get('sent_id', None)
+        sent_act = request.POST.get('sent_act', None)
+        Bios = request.POST.get('Bios', None)
+
+    search_dict = dict()
+    search_dict['example_id'] = example_id
+    search_dict['sentence_id'] = sentence_id
+    search_dict['reviewer'] = userid
+
+    user_tag_info = models.PolicySentenceTag.objects.filter(**search_dict)
+    rawlabel = models.PolicySentenceTag.objects.get(**search_dict).label
+    label = ''
+    for i, w in enumerate(Bios):
+        if w != '*':
+            label += w
+        else:
+            label += rawlabel[i]
+
+    data = {'label': label, 'sentence_tag': sent_act}
+    user_tag_info.update(**data)
+
+    return HttpResponse(json.dumps({"msg": 'success'}))
+
+
+@csrf_exempt
+def savetag(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+    userid = request.session['userid']
+    if request.is_ajax():
+        nowtextid = request.POST.get('nowtextid', None)
+        sentid = request.POST.get('sentid', None)
+        ActBios = request.POST.get('ActBios', None)
+
+    unique_id = str(nowtextid) + '_' + sentid
+    rawdata = models.PolicySentence.objects.get(unique_id=unique_id)
+    sentence = rawdata.sentence
+
+    search_dict = dict()
+    if nowtextid:
+        search_dict['unique_id'] = unique_id
+    # if sentid:
+    #     search_dict['sentence_id'] = sentid
+    if userid:
+        search_dict['reviewer'] = userid
+
+    user_tag_info = models.PolicySentenceTag.objects.filter(**search_dict)
+    text_exist = user_tag_info.exists()
+
+    # print('default:',default_label)
+    # print('ActBios:',ActBios)
+
+    label = ActBios[1:]
+
+    sentence_act = ActBios[:1]
+
+    if text_exist:
+        data = {'label': label, 'sentence_act': sentence_act}
+        user_tag_info.update(**data)
+    else:
+        new_tag = models.PolicySentenceTag()
+        new_tag.example_id = nowtextid
+        # print('*********savetag:*********',new_tag.example_id)
+        new_tag.unique_id = unique_id
+        new_tag.sentence_id = sentid
+        new_tag.sentence = sentence
+
+        new_tag.label = label
+        if sentence_act != '*':
+            new_tag.sentence_tag = act_dict[sentence_act]  # act_dict[int(dialogue_act)]
+        else:
+            new_tag.sentence_tag = '未标记'
+        new_tag.reviewer = userid
+        # print('*********savetag:*********',new_tag.sentence_id, new_tag.dialogue_act)
+        new_tag.save()
+    return HttpResponse(json.dumps({"msg": 'success'}))
+# ========================================下面的还没写好==============================================================
 
 
 @csrf_exempt
@@ -308,57 +412,6 @@ def lookandmodify1(request):
 
     return render(request,'modify1.html',{'dia_text': dia_text,'selfreport':selfreport, 
         'diagnose':diagnose, 'nowtext_id': example_id,'tag_sum':tag_sum_1,'exist_report':exist_report})
-
-
-
-
-@csrf_exempt
-def lookandmodify(request):
-    if not request.session.get('is_login', None):
-        # 如果本来就未登录，也就没有登出一说
-        return redirect("/login/")
-
-    eid = request.POST.get('eid', None)
-
-    reviewer = request.session['userid']
-
-
-    TagData = models.TagText.objects.filter(example_id=eid,reviewer = reviewer)
-    cutted_text = [i.sentence for i in TagData]#cutsent(nowtext)
-    people = [i.speaker for i in TagData]
-    uid = [i.unique_id for i in TagData]
-
-    label = []
-    dia_text = []
-    for i in TagData:
-        try:
-            add_ = list(i.label) 
-            add_s = i.speaker+':'+i.sentence
-        except:
-            add_ = []
-            add_s = i.speaker+':'+'(空)'
-        label.append(add_)
-        dia_text.append(add_s)
-
-
-    dia_text = zip(dia_text)
-
-    lenpos = [dict(zip(range(1,len(i)+1),[bio_dict[int(j)] for j in i])) for i in label]
-
-    acts = [i.dialogue_act for i in TagData]
-    norms = []
-    for i in TagData:
-        norm0 = i.normalized.split('|')[:-1]
-        norms.append(dict(zip(range(1,len(norm0)+1),norm0)))
-
-
-    cutted = zip(uid, cutted_text, people, acts, lenpos, norms)
-        
-    selfreport = models.SelfReport.objects.get(example_id = eid).question
-    diagnose = models.SelfReport.objects.get(example_id = eid).diagnose
-
-    return render(request, 'modify_new.html', {'dia_text': dia_text,'selfreport':selfreport, 'diagnose':diagnose, 
-        'nowtext_id': eid,'cutted':cutted,'sections_BIO':res1,'sections_ACT':res2,'lenpos':lenpos})
 
 
 @csrf_exempt
@@ -520,60 +573,6 @@ def ajaxmethod(request):
     leng = len(method_list)
     return HttpResponse(json.dumps({"cid":cid_list,"methods":method_list,"leng":leng}, ensure_ascii=False))
 
-@csrf_exempt
-def savetag(request):
-    if not request.session.get('is_login', None):
-        # 如果本来就未登录，也就没有登出一说
-        return redirect("/login/")
-    userid = request.session['userid']
-    if request.is_ajax():
-        nowtextid = request.POST.get('nowtextid', None)
-        sentid = request.POST.get('sentid', None)
-        ActBios = request.POST.get('ActBios', None)
-
-    unique_id = str(nowtextid)+'_'+sentid
-    rawdata = models.PolicySentence.objects.get(unique_id=unique_id)
-    sentence = rawdata.sentence
-
-    search_dict = dict()
-    if nowtextid:
-        search_dict['unique_id'] = unique_id
-    # if sentid:
-    #     search_dict['sentence_id'] = sentid
-    if userid:
-        search_dict['reviewer'] = userid
-    
-    user_tag_info = models.PolicySentenceTag.objects.filter(**search_dict)
-    text_exist = user_tag_info.exists()
-
-    # print('default:',default_label)
-    # print('ActBios:',ActBios)
-
-    label = ActBios[1:]
-
-    sentence_act = ActBios[:1]
-
-    if text_exist:
-        data = {'label':label, 'sentence_act':sentence_act}
-        user_tag_info.update(**data)
-    else:
-        new_tag = models.PolicySentenceTag()
-        new_tag.example_id = nowtextid
-        # print('*********savetag:*********',new_tag.example_id)
-        new_tag.unique_id = unique_id
-        new_tag.sentence_id = sentid
-        new_tag.sentence = sentence
-
-        new_tag.label = label
-        if sentence_act != '*':
-            new_tag.sentence_tag = act_dict[sentence_act] #act_dict[int(dialogue_act)]
-        else:
-            new_tag.sentence_tag = '未标记'
-        new_tag.reviewer = userid
-        # print('*********savetag:*********',new_tag.sentence_id, new_tag.dialogue_act)
-        new_tag.save()
-    return HttpResponse(json.dumps({"msg": 'success'}))
-
 
 @csrf_exempt
 def modify_report(request):
@@ -584,42 +583,5 @@ def modify_report(request):
 
     return HttpResponse(json.dumps({"msg": 'success'}))
 
-@csrf_exempt
-def modifytag(request):
-    if not request.session.get('is_login', None):
-        # 如果本来就未登录，也就没有登出一说
-        return redirect("/login/")
-    userid = request.session['userid']
 
-    if request.is_ajax():
-        example_id = request.POST.get('example_id', None)
-        dialogue_act = request.POST.get('dialogue_act', None)  
-        Bios = request.POST.get('Bios', None)
-        sen_norm = request.POST.get('sen_norm', None)
-        sentence_id = request.POST.get('sentid',None)
-
-    search_dict = dict()
-    search_dict['example_id'] = example_id
-    search_dict['sentence_id'] = sentence_id
-    search_dict['reviewer'] = userid
-    
-    user_tag_info = models.TagText.objects.filter(**search_dict)
-
-    normalized = sen_norm
-
-
-    rawlabel = models.TagText.objects.get(**search_dict).label
-    label = ''
-
-    for i,w in enumerate(Bios):
-        if w!= '*':
-            label += w
-        else:
-            label += rawlabel[i]
-
-    data = {'label':label, 'dialogue_act':dialogue_act,'normalized':normalized}
-    user_tag_info.update(**data)
-
-
-    return HttpResponse(json.dumps({"msg": 'success'}))
 

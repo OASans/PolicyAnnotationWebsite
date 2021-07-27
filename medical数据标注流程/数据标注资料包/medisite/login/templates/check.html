@@ -91,24 +91,21 @@
                                     <table class="table table-responsive" >
                                         <thead>
                                             <tr>
-                                                <th style="font-weight:bold;width: 50px">对话序号</th>
-                                                <th style="font-weight:bold;width: 300px">患者提问</th>
-                                                <th style="font-weight:bold;width: 50px">疾病</th>
+                                                <th style="font-weight:bold;width: 50px">政策序号</th>
+                                                <th style="font-weight:bold;width: 300px">政策原文</th>
+                                                <th style="font-weight:bold;width: 300px">标注时间</th>
                                                <!--  <th style="font-weight:bold;width: 100px">标记实体</th> -->
 												<th style="font-weight:bold;width: 50px">操作</th>
                                                 
                                             </tr>
                                         </thead>
                                         <tbody id = "rowcount">
-										{%for k,v,d in tagged%}
+										{%for k,v,t in tagged%}
                                             <tr id="{{k}}">
                                                 <th scope="row" style="width: 50px">{{k}}</th>
-                                                <td style="width: 300px">{{v}}</td>
-                                                <td style="width: 50px">{{d}}</td>
-                                                <!-- <td style="width: 100px">{{t}}</td> -->
-
+                                                <td style="width: 300px">{{v}}...</td>
+                                                <td style="width: 300px">{{t}}</td>
 												<td style="width: 50px">
-												<!-- <button id="look{{k}}" name="look" value="{{k}}" type="button" class="btn btn-primary ">查看</button> -->
 												<button id="modify{{k}}" name="modify" value="{{k}}" type="button" class="btn btn-primary ">修改</button>
 												</td>												
                                             </tr>

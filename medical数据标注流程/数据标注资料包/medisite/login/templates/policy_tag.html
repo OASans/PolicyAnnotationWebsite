@@ -103,11 +103,11 @@
 						{% block content %}
                             <div class="card alert nestable-cart">
                                 <div class="card-header">
-									<p id='fatherp' style="font-size:16px"> 待标注对话序号:   <b id='textid' style="display: inline;">{{nowtext_id}}</b> </p>
+									<p id='fatherp' style="font-size:16px"> 待标注政策序号:   <b id='textid' style="display: inline;">{{nowtext_id}}</b> </p>
                                 </div>
-                                <div class="card-body" >
-                                    <div class="example box" data-options='{"direction": "vertical", "contentSelector": ">", "containerSelector": ">"}'>
-                                        <div id="dialog">
+                                <div class="card-body">
+                                    <div class="example box" data-options='{"direction": "vertical", "contentSelector": ">", "containerSelector": ">"}' style="overflow-y: auto">
+                                        <div id="policy">
                                             <p style=" font-size:16px">
                                                 <b>政策原文：</b><br />
 
@@ -152,26 +152,32 @@
                                             <td> &#12288 </td><td >&#12288</td>  <td >&#12288  </td><td > &#12288 </td>
                                             <td> &#12288 </td><td >&#12288</td>  <td >&#12288  </td><td > &#12288 </td>
                                         </tr>
+
                                         <tr id="{{k}}" style="height:10px">
                                             <td id = "act_{{k}}">
                                                 <select id='ACT_{{k}}' name="section1" style="width:90px">
-{#                                                    <option value="">{{a}}</option>#}
                                                     {%for sec in sections_ACT%}
                                                         <option value="{{sec.0}}">{{sec.1}}</option>
                                                     {% endfor %}
                                                 </select>
 
                                             </td>
+
                                             {%for ii,default in l.items%}
                                                 <td id = "bio_{{k}}">
                                                     <select id='BIO_{{k}}_{{ii}}' name="section2" style="width:50px">
 {#                                                        <option value="*">{{default}}</option>#}
                                                         {%for sec in sections_BIO%}
-                                                            <option value="{{sec.0}}">{{sec.1}}</option>
+                                                            {% if default == sec.1 %}
+                                                                <option value="{{sec.0}}" selected="selected">{{sec.1}}</option>
+                                                            {% else %}
+                                                                <option value="{{sec.0}}">{{sec.1}}</option>
+                                                            {% endif %}
                                                         {% endfor %}
                                                     </select>
                                                 </td>
                                             {% endfor %}
+
                                             <td> &#12288 </td><td >&#12288 </td>  <td >&#12288 </td><td > &#12288 </td>
                                             <td> &#12288 </td><td >&#12288</td>  <td >&#12288  </td><td > &#12288 </td>
                                             <td> &#12288 </td><td >&#12288</td>  <td >&#12288  </td><td > &#12288 </td>
@@ -241,8 +247,6 @@
                 ActBios = ActBios + sen_act
 
                 //sentence BIO    // normalization
-                var nk = new String;
-                var sen_norm = '';
                 var nk = 'bio_'+textid+'_'+k;
                 biolen = $('td#'+nk).length;
                 // console.log(k+'biolen:'+biolen)

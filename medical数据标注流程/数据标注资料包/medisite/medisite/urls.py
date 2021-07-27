@@ -30,29 +30,26 @@ from django.conf.urls import url
 from login import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls), 
-    path('',views.taghome),
-    # path('register/',views.register),
-    path('index/',views.index),
     path('example1/',views.example1),
     path('example2/', views.example2),
     path('example3/', views.example3),
-    path('check/',views.check),
-    path('lookandmodify/',views.lookandmodify),
     path('logout/', views.logout),
     # path('tagnext/', views.tagnext),
 
     path('report/',views.report),
     path('savereport/', views.savereport),
 
-    path('savetag/', views.savetag),
-    path('modifytag/', views.modifytag),
-
-    path('check1/',views.check_report),
     path('lookandmodify1/',views.lookandmodify1),
     path('ajaxmethod/', views.ajaxmethod),
 
-    path('login/',views.policy_login),
     # TODO
+    path('admin/', admin.site.urls),
+    path('', views.taghome),
+    path('login/',views.policy_login),
+    path('index/',views.index),
     path('tagging/', views.policy_tagging),
+    path('savetag/', views.savetag),
+    path('check/', views.check),
+    path('lookandmodify/', views.lookandmodify),
+    path('modifytag/', views.modifytag),
 ]

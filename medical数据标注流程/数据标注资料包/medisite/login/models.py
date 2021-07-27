@@ -73,7 +73,7 @@ class PolicySentenceTag(models.Model):
     label = models.CharField(verbose_name='BIO标签', max_length=300,null=True)
 
     reviewer = models.IntegerField(verbose_name='标注者id')
-    savedate = models.DateTimeField('保存日期', default=timezone.now)
+    savedate = models.DateTimeField('保存日期', auto_now=True)
 
     def __str__(self):
         return self.label
