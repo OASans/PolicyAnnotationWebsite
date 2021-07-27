@@ -59,15 +59,14 @@
         <div class="nano">
             <div class="nano-content">
                 <ul>
-                    <li class="active">
+                    <li>
 						<a  href="/index/"><i class="ti-home"></i> 首页 </a>
-                    </li>					
-                                      
-                    <li><a href="/tagging/"><i class="ti-tag"></i> 标注主页面</a></li>
+                    </li>
+                    <li><a href="/example1/"><i class="ti-layout-grid2-alt"></i>查看标注说明</a></li>
+                    <li class="active"><a href="/tagging/"><i class="ti-tag"></i> 标注主页面</a></li>
+
 					<li><a href="/check/"><i class="ti-eye"></i>查看已标注文本</a></li>
                     <li><a href="/check1/"><i class="ti-pencil"></i> 查看诊疗报告</a></li>
-                    <li><a href="/example1/"><i class="ti-layout-grid2-alt"></i>查看标注说明</a></li>
-
                     <li><a href="/logout/"><i class="ti-close"></i>登出</a></li>
 
                 </ul>
@@ -115,10 +114,6 @@
                                                 {{diagnose}} <br />
                                                 <b>患者提问：</b>
                                                 {{selfreport}}<br /><br />
-                                                <!-- <b>对话内容:</b><br />
-                                            {% for dia in dia_text %}
-                                                {{dia.0}}<br />
-                                            {% endfor %} -->
                                             </p>
                                         </div>
                                     </div>
@@ -170,7 +165,7 @@
                                             {%for ii,default in l.items%}
                                                 <td id = "bio_{{k}}">
                                                     <select id='BIO_{{k}}_{{ii}}' name="section2" style="width:50px">
-                                                        <option value="*">{{default}}</option>
+{#                                                        <option value="*">{{default}}</option>#}
                                                         {%for sec in sections_BIO%}
                                                             <option value="{{sec.0}}">{{sec.1}}</option>
                                                         {% endfor %}

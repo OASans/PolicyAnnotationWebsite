@@ -33,21 +33,28 @@ urlpatterns = [
     path('admin/', admin.site.urls), 
     path('',views.taghome),
     # path('register/',views.register),
-    path('login/',views.login),
     path('index/',views.index),
     path('example1/',views.example1),
-    path('taglogistic/',views.taglogistic),
-    path('example2/',views.example2),
+    path('example2/', views.example2),
+    path('example3/', views.example3),
     path('check/',views.check),
     path('lookandmodify/',views.lookandmodify),
-    path('report/',views.report),
-    path('check1/',views.check_report),
-    path('lookandmodify1/',views.lookandmodify1),
     path('logout/', views.logout),
-    path('tagging/', views.tagging),
     # path('tagnext/', views.tagnext),
+
+    path('report/',views.report),
     path('savereport/', views.savereport),
-    path('ajaxmethod/', views.ajaxmethod),
+
     path('savetag/', views.savetag),
     path('modifytag/', views.modifytag),
+
+    path('taglogistic/',views.taglogistic),
+    path('check1/',views.check_report),
+    path('lookandmodify1/',views.lookandmodify1),
+    path('ajaxmethod/', views.ajaxmethod),
+
+    path('login/',views.policy_login),
+    # path('tagging/', views.tagging),
+    # TODO
+    path('tagging/', views.policy_tagging),
 ]

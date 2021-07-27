@@ -30,15 +30,14 @@
         <div class="nano">
             <div class="nano-content">
                 <ul>
-                    <li class="active">
+                    <li>
                         <a  href="/index/"><i class="ti-home"></i> 首页 </a>
                     </li>
-                      
+                    <li class="active"><a href="/example1/"><i class="ti-layout-grid2-alt"></i>查看标注说明</a></li>
                       
                     <li><a href="/tagging/"><i class="ti-tag"></i> 标注主页面</a></li>
                     <li><a href="/check/"><i class="ti-eye"></i>查看已标注文本</a></li>
                     <li><a href="/check1/"><i class="ti-pencil"></i> 查看诊疗报告</a></li>
-                    <li><a href="/example1/"><i class="ti-layout-grid2-alt"></i>查看标注说明</a></li>
 
                     <li><a href="/logout/"><i class="ti-close"></i>登出</a></li>
                 </ul>
@@ -63,7 +62,7 @@
                     <div class="col-lg-12 p-0">
                         <div class="page-header">
                             <div class="page-title">
-                                <h1>首页</h1>
+                                <h1>标注说明</h1>
                             </div>
                         </div>
                     </div>
@@ -118,7 +117,7 @@
 							<button class="btn btn-primary" style="width:15%;margin:10px;float:right;"><a href="/tagging/">开始标注</a></button>
 							<button style="width:15%;margin:10px;float:right;" id="before"  class="btn btn-primary">
                                 <a href="{% static "files/标注规范.pdf" %}" target="_blank">下载标注规范</a> </button>
-
+{#                            标注规范在static/file文件夹#}
 
 
                         </div>

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# coding=utf-8
 from django.shortcuts import render
 from django.shortcuts import redirect
 import json
@@ -17,10 +19,14 @@ from . import models
 from django.views.decorators.csrf import csrf_exempt
 
 num_per = 5
-#####
-dia_starts = models.RawText.objects.filter(sentence_id = 1)
+##### TODO:
+dia_starts = models.RawText.objects.filter(sentence_id=1)
 num_dia = dia_starts.count()
 dia_ids = [m.example_id for m in dia_starts]
+
+policy_starts = models.PolicySentence.objects.filter(sentence_id=0)
+num_policy = policy_starts.count()
+policy_ids = [m.example_id for m in policy_starts]
 
 # bio_dict = {0:'0:O',1:'1:I',2:'2:B-症状',3:'3:B-药品名',4:'4:B-药物类别',
 #     5:'5:B-服用方式等',6:'6:B-检查',7:'7:B-操作',8:'8:B-注意事项'}
@@ -44,73 +50,9 @@ for i in sections2:
     res2.append([i.aid, i.actid])
     
 
-
 def taghome(request):
     return redirect('/login/')
 
-def index(request):
-    if request.session.get('is_login', None):
-        reviewerid = request.session['userid']
-        print('reviewerid:',reviewerid)
-        lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-savedate')
-
-        userstart = models.User.objects.get(id=reviewerid).start
-        userend = models.User.objects.get(id=reviewerid).end
-        start_index = dia_ids.index(userstart)
-        end_index = dia_ids.index(userend)
-        text_exist = lasttext.exists()
-        if text_exist:
-            unique_list = models.TagText.objects.filter(reviewer=reviewerid,sentence_id=1).order_by('savedate').values('unique_id')
-            complete_text = len(list(unique_list))
-            total_text = end_index-start_index+1
-            complete_percent = int((complete_text/total_text)*100)
-            undo_text = end_index-start_index-complete_text+1
-            undo_percent = int((undo_text/total_text)*100)
-            return render(request, 'index.html', {'complete': complete_text,'percent1':complete_percent,'undo':undo_text,'percent2':undo_percent})
-        else:
-            last_textid = 0
-            undo_text = end_index-start_index+1
-            complete_percent = 0
-            undo_percent = 100
-            return render(request, 'index.html', {'complete': last_textid, 'percent1': complete_percent, 'undo': undo_text,'percent2': undo_percent})
-
-    else:
-        message = "您尚未登陆！"
-        return render(request, 'page-login.html', {'message': message})
-
-def example1(request):
-    if request.session.get('is_login', None):
-        return render(request, 'example1.html')
-    else:
-        message = "您尚未登录！"
-        return render(request, 'page-login.html', {'message': message})
-
-def example2(request):
-    if request.session.get('is_login', None):
-        return render(request, 'example2.html')
-    else:
-        message = "您尚未登录！"
-        return render(request, 'page-login.html', {'message': message})
-
-def example3(request):
-    if request.session.get('is_login', None):
-        return render(request, 'example3.html')
-    else:
-        message = "您尚未登录！"
-        return render(request, 'page-login.html', {'message': message})
-
-
-def taglogistic(request):
-    if request.session.get('is_login', None):
-        filepath = '/home/LT/fraudsite/login/templates/taglogistic.pdf'
-        file = open(filepath, 'rb')
-        response = FileResponse(file)
-        response['Content-Type'] = 'application/octet-stream'
-        response['Content-Disposition'] = 'attachment;filename="taglogistic.pdf"'
-        return response
-    else:
-        message = "您尚未登录！"
-        return render(request, 'page-login.html', {'message': message})
 
 @csrf_exempt
 def login(request):
@@ -144,6 +86,240 @@ def login(request):
             message = '用户名和密码不能为空'
             return render(request, 'page-login.html', {'message': message})
     return render(request, 'page-login.html')
+
+
+def index(request):
+    if request.session.get('is_login', None):
+        reviewerid = request.session['userid']
+        print('reviewerid:',reviewerid)
+        lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid).order_by('-savedate')
+
+        userstart = models.PolicyTagger.objects.get(id=reviewerid).start
+        userend = models.PolicyTagger.objects.get(id=reviewerid).end
+        start_index = policy_ids.index(userstart)
+        end_index = policy_ids.index(userend)
+        text_exist = lasttext.exists()
+        if text_exist:
+            unique_list = models.PolicySentenceTag.objects.filter(reviewer=reviewerid,sentence_id=0).order_by('savedate').values('unique_id')
+            complete_text = len(list(unique_list))
+            total_text = end_index-start_index+1
+            complete_percent = int((complete_text/total_text)*100)
+            undo_text = end_index-start_index-complete_text+1
+            undo_percent = int((undo_text/total_text)*100)
+            return render(request, 'index.html', {'complete': complete_text,'percent1':complete_percent,'undo':undo_text,'percent2':undo_percent})
+        else:
+            last_textid = 0
+            undo_text = end_index-start_index+1
+            complete_percent = 0
+            undo_percent = 100
+            return render(request, 'index.html', {'complete': last_textid, 'percent1': complete_percent, 'undo': undo_text,'percent2': undo_percent})
+
+    else:
+        message = "您尚未登陆！"
+        return render(request, 'page-login.html', {'message': message})
+
+
+# 标注规范页
+def example1(request):
+    if request.session.get('is_login', None):
+        return render(request, 'example1.html')
+    else:
+        message = "您尚未登录！"
+        return render(request, 'page-login.html', {'message': message})
+
+
+# 标注示例页，TODO
+def example2(request):
+    if request.session.get('is_login', None):
+        return render(request, 'example2.html')
+    else:
+        message = "您尚未登录！"
+        return render(request, 'page-login.html', {'message': message})
+
+
+# 标注示例页，TODO
+def example3(request):
+    if request.session.get('is_login', None):
+        return render(request, 'example3.html')
+    else:
+        message = "您尚未登录！"
+        return render(request, 'page-login.html', {'message': message})
+
+
+@csrf_exempt
+def tagging(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+
+    # 先确定标注用户，此时标注内容
+    reviewerid = request.session['userid']
+    # print('reviewerid:',reviewerid)
+    lasttext = models.TagText.objects.filter(reviewer=reviewerid, sentence_id=1).order_by('-savedate')
+    text_exist = lasttext.exists()
+
+    userstart = models.User.objects.get(id=reviewerid).start
+    topid = models.User.objects.get(id=reviewerid).end  # end 是example_id
+
+    # 判断该用户是否已有标注记录。
+    # 如果没有，则从start开始标注。
+    # 如果有，判断是否ajax，如果是，则接着last_textid从POST.get 获得；如果不是，last_texid从lasttext获得
+    # 判断是否标注任务全部完成。
+    # 如果
+    if not text_exist:  # 尚未开始标注
+        now_id = userstart
+
+    else:  # 已有标注记录
+        # 得到已标记的exampid 在 dia_act 中的index
+        id_exist = [i.example_id for i in lasttext]
+        # for text in lasttext:
+        #     eid = int(text.example_id)
+        #     id_exist.append(eid)
+        # id_exist = set(id_exist) # 选择出有bio标记的
+        id_exist_set = set(id_exist)
+        id_all = [i for i in dia_ids[dia_ids.index(userstart): dia_ids.index(topid) + 1]]
+        id_no = []
+        for eid in id_all:
+            if eid not in id_exist_set:
+                id_no.append(eid)
+
+        if id_no != []:
+            now_id = id_no[0]
+
+        else:
+            return render(request, 'tag.html', {'nowtext_id': '您已完成全部标注任务！'})
+
+    nowtext0 = models.RawText.objects.filter(example_id=now_id)
+    cutted_text = [i.sentence for i in nowtext0]  # cutsent(nowtext)
+    people = [i.speaker for i in nowtext0]
+    uid = [i.unique_id for i in nowtext0]
+
+    label = []
+    for i in nowtext0:
+        try:
+            add_ = list(i.label)
+        except:
+            add_ = []
+        label.append(add_)
+
+    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[int(j)] for j in i])) for i in label]
+
+    acts = ['请选择动作' for i in nowtext0]
+    cutted = zip(uid, cutted_text, people, acts, lenpos)
+
+    selfreport = models.SelfReport.objects.get(example_id=now_id).question
+    diagnose = models.SelfReport.objects.get(example_id=now_id).diagnose
+    return render(request, 'tag.html', {'selfreport': selfreport, 'diagnose': diagnose,
+                                        'nowtext_id': now_id, 'cutted': cutted, 'sections_BIO': res1,
+                                        'sections_ACT': res2, 'lenpos': lenpos})
+
+
+@csrf_exempt
+def policy_login(request):
+    if request.session.get('is_login', None): # 不允许重复登录
+        return redirect('/index/')
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        if username.strip() and password:#用户名和密码非空
+            try:
+                print('username:',username)
+                user = models.PolicyTagger.objects.get(name=username)
+            except :
+                message = '用户不存在！'
+                return render(request, 'page-login.html', {'message': message})
+
+            if user.password == password:
+                #print(username, password)
+                request.session.set_expiry(0)
+                request.session['is_login'] = True
+                request.session['userid'] = user.id
+                request.session['username'] = user.name
+                request.session['userstart'] = user.start
+                request.session['userend'] = user.end
+                return redirect("/index/")
+
+            else:
+                message = '密码不正确！'
+                return render(request, 'page-login.html', {'message': message})
+        else:
+            message = '用户名和密码不能为空'
+            return render(request, 'page-login.html', {'message': message})
+    return render(request, 'page-login.html')
+
+
+@csrf_exempt
+def policy_tagging(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+
+    # 先确定标注用户，此时标注内容
+    reviewerid = request.session['userid']
+    # print('reviewerid:',reviewerid)
+    lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid, sentence_id=0).order_by('-savedate')
+    text_exist = lasttext.exists()
+
+    userstart = models.PolicyTagger.objects.get(id=reviewerid).start
+    topid = models.PolicyTagger.objects.get(id=reviewerid).end  # end 是example_id
+
+    # 判断该用户是否已有标注记录。
+    # 如果没有，则从start开始标注。
+    # 如果有，判断是否ajax，如果是，则接着last_textid从POST.get 获得；如果不是，last_texid从lasttext获得
+    # 判断是否标注任务全部完成。
+    # 如果
+    if not text_exist:  # 尚未开始标注
+        now_id = userstart
+
+    else:  # 已有标注记录
+        # 得到已标记的exampid 在 dia_act 中的index
+        id_exist = [i.example_id for i in lasttext]
+        # for text in lasttext:
+        #     eid = int(text.example_id)
+        #     id_exist.append(eid)
+        # id_exist = set(id_exist) # 选择出有bio标记的
+        id_exist_set = set(id_exist)
+        id_all = [i for i in policy_ids[policy_ids.index(userstart): policy_ids.index(topid) + 1]]
+        id_no = []
+        for eid in id_all:
+            if eid not in id_exist_set:
+                id_no.append(eid)
+
+        if id_no != []:
+            now_id = id_no[0]
+
+        else:
+            return render(request, 'tag.html', {'nowtext_id': '您已完成全部标注任务！'})
+
+    nowtext0 = models.PolicySentence.objects.filter(example_id=now_id)
+    cutted_text = [i.sentence for i in nowtext0]  # cutsent(nowtext)
+    uid = [i.unique_id for i in nowtext0]
+
+    label = []
+    for i in nowtext0:
+        label.append(['0'] * len(i.sentence))
+
+    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[int(j)] for j in i])) for i in label]
+    acts = ['请选择类别' for i in nowtext0]
+    cutted = zip(uid, cutted_text, acts, lenpos)
+
+    whole_policy = models.PolicyText.objects.get(example_id=now_id).text
+    return render(request, 'policy_tag.html', {'whole_policy': whole_policy,
+                                        'nowtext_id': now_id, 'cutted': cutted, 'sections_BIO': res1,
+                                        'sections_ACT': res2, 'lenpos': lenpos})
+
+
+def taglogistic(request):
+    if request.session.get('is_login', None):
+        filepath = '/home/LT/fraudsite/login/templates/taglogistic.pdf'
+        file = open(filepath, 'rb')
+        response = FileResponse(file)
+        response['Content-Type'] = 'application/octet-stream'
+        response['Content-Disposition'] = 'attachment;filename="taglogistic.pdf"'
+        return response
+    else:
+        message = "您尚未登录！"
+        return render(request, 'page-login.html', {'message': message})
 
 
 def register(request):
@@ -194,7 +370,7 @@ def check_report(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     reviewerid = request.session['userid']
-    lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-textid')
+    lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-savedate')  # TODO
     text_exist = lasttext.exists()
     if not text_exist: #尚未开始标注
         message = "您尚未开始标注!"
@@ -213,24 +389,22 @@ def check(request):
     if not request.session.get('is_login', None):
         return redirect("/login/")
     reviewerid = request.session['userid']
-    lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-textid')
+    lasttext = models.TagText.objects.filter(reviewer=reviewerid).order_by('-savedate')
     text_exist = lasttext.exists()
     if not text_exist: #尚未开始标注
         message = "您尚未开始标注!"
         return render(request, 'check.html', {'message': message})
     else: #已有标注记录
         message = "您标注过以下文本："
-        textlist = models.TagText.objects.filter(reviewer=reviewerid, sentence_id = 1)#.order_by('savedate').values('sentence')  
+        textlist = models.TagText.objects.filter(reviewer=reviewerid, sentence_id=1)#.order_by('savedate').values('sentence')
         example_ids = [i.example_id for i in textlist]
         # unique_ids = [i.unique_id for i in textlist]
-        questions = [models.SelfReport.objects.get(example_id = i).question for i in example_ids]
-        diagnoses = [models.SelfReport.objects.get(example_id = i).diagnose for i in example_ids]
-
-
+        questions = [models.SelfReport.objects.get(example_id=i).question for i in example_ids]
+        diagnoses = [models.SelfReport.objects.get(example_id=i).diagnose for i in example_ids]
 
         tagged = zip(example_ids, questions,diagnoses)
-
         return render(request,'check.html', {'tagged':tagged,'message': message})
+
 
 @csrf_exempt
 def lookandmodify1(request):
@@ -339,82 +513,6 @@ def lookandmodify(request):
 
     return render(request, 'modify_new.html', {'dia_text': dia_text,'selfreport':selfreport, 'diagnose':diagnose, 
         'nowtext_id': eid,'cutted':cutted,'sections_BIO':res1,'sections_ACT':res2,'lenpos':lenpos})
-
-
-
-@csrf_exempt
-def tagging(request):
-    if not request.session.get('is_login', None):
-        # 如果本来就未登录，也就没有登出一说
-        return redirect("/login/")
-
-    #先确定标注用户，此时标注内容
-    reviewerid = request.session['userid']
-    # print('reviewerid:',reviewerid)
-    lasttext = models.TagText.objects.filter(reviewer=reviewerid,sentence_id=1).order_by('-savedate')
-    text_exist = lasttext.exists()
-
-    userstart = models.User.objects.get(id=reviewerid).start
-    topid = models.User.objects.get(id=reviewerid).end  #end 是example_id
-
-    #判断该用户是否已有标注记录。
-    #如果没有，则从start开始标注。
-    #如果有，判断是否ajax，如果是，则接着last_textid从POST.get 获得；如果不是，last_texid从lasttext获得
-        # 判断是否标注任务全部完成。
-        #如果
-    if  not text_exist : #尚未开始标注
-        now_id = userstart
- 
-    else: #已有标注记录
-        #得到已标记的exampid 在 dia_act 中的index
-        id_exist = [i.example_id for i in lasttext]
-        # for text in lasttext:
-        #     eid = int(text.example_id)
-        #     id_exist.append(eid)
-        # id_exist = set(id_exist) # 选择出有bio标记的
-        id_exist_set = set(id_exist)
-        id_all = [i for i in dia_ids[dia_ids.index(userstart): dia_ids.index(topid)+1 ]]
-        id_no = []
-        for eid in id_all:
-            if eid not in id_exist_set:
-                id_no.append(eid)
-
-        if id_no != []:
-            now_id = id_no[0] 
-
-        else:
-            return render(request, 'tag.html', {'nowtext_id':'您已完成全部标注任务！'})
-
-    nowtext0 = models.RawText.objects.filter(example_id=now_id)
-    cutted_text = [i.sentence for i in nowtext0]#cutsent(nowtext)
-    people = [i.speaker for i in nowtext0]
-    uid = [i.unique_id for i in nowtext0]
-
-    label = []
-    dia_text = []
-    for i in nowtext0:
-        try:
-            add_ = list(i.label) 
-            add_s = i.speaker+':'+i.sentence
-        except:
-            add_ = []
-            add_s = i.speaker+':'+'(空)'
-        label.append(add_)
-        dia_text.append(add_s)
-
-
-    dia_text = zip(dia_text)
-
-    lenpos = [dict(zip(range(1,len(i)+1),[bio_dict[int(j)] for j in i])) for i in label]
-
-    acts = ['请选择动作' for i in nowtext0]
-    cutted = zip(uid, cutted_text, people, acts,lenpos)
-        
-    selfreport = models.SelfReport.objects.get(example_id = now_id).question
-    diagnose = models.SelfReport.objects.get(example_id = now_id).diagnose
-    return render(request, 'tag.html', {'dia_text': dia_text,'selfreport':selfreport, 'diagnose':diagnose, 
-        'nowtext_id': now_id,'cutted':cutted,'sections_BIO':res1,'sections_ACT':res2,'lenpos':lenpos})
-
 
 
 @csrf_exempt
@@ -586,15 +684,10 @@ def savetag(request):
         nowtextid = request.POST.get('nowtextid', None)
         sentid = request.POST.get('sentid', None)
         ActBios = request.POST.get('ActBios', None)
-        sen_norm = request.POST.get('sen_norm', None)
-
 
     unique_id = str(nowtextid)+'_'+sentid
-    rawdata = models.RawText.objects.get(unique_id = unique_id)
-    default_label = rawdata.label
+    rawdata = models.PolicySentence.objects.get(unique_id=unique_id)
     sentence = rawdata.sentence
-    speaker = rawdata.speaker
-
 
     search_dict = dict()
     if nowtextid:
@@ -604,8 +697,7 @@ def savetag(request):
     if userid:
         search_dict['reviewer'] = userid
     
-    
-    user_tag_info = models.TagText.objects.filter(**search_dict)
+    user_tag_info = models.PolicySentenceTag.objects.filter(**search_dict)
     text_exist = user_tag_info.exists()
 
     # print('default:',default_label)
@@ -614,17 +706,13 @@ def savetag(request):
     label = ''
 
     for i in range(1,len(ActBios)):
-        if ActBios[i]=='*':
-            label +=default_label[i-1]
-        else:
-            label+=ActBios[i]
+        label += ActBios[i]
     # print('label:',label)
 
-    dialogue_act = ActBios[:1]
-    normalized = sen_norm
+    sentence_act = ActBios[:1]
 
     if text_exist:
-        data = {'label':label, 'dialogue_act':dialogue_act,'normalized':normalized}
+        data = {'label':label, 'sentence_act':sentence_act}
         user_tag_info.update(**data)
     else:
         new_tag = models.TagText()
@@ -632,21 +720,16 @@ def savetag(request):
         # print('*********savetag:*********',new_tag.example_id)
         new_tag.unique_id = unique_id
         new_tag.sentence_id = sentid
-        new_tag.speaker = speaker
         new_tag.sentence = sentence
 
         new_tag.label = label
-        new_tag.normalized = normalized
-        new_tag.type = ''
-        if dialogue_act != '*':
-            new_tag.dialogue_act = act_dict[dialogue_act] #act_dict[int(dialogue_act)]
+        if sentence_act != '*':
+            new_tag.sentence_tag = act_dict[sentence_act] #act_dict[int(dialogue_act)]
         else:
-            new_tag.dialogue_act = '未标记'
-        new_tag.report = 'report'
+            new_tag.sentence_tag = '未标记'
         new_tag.reviewer = userid
         # print('*********savetag:*********',new_tag.sentence_id, new_tag.dialogue_act)
         new_tag.save()
-
     return HttpResponse(json.dumps({"msg": 'success'}))
 
 
