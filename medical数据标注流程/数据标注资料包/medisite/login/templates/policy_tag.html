@@ -221,7 +221,6 @@
 
 	<script>
 
-
         $(document).on('click','#save',function(){
             var textid = document.getElementById("textid").innerText;
             console.log("text id2:"+textid);
@@ -276,19 +275,7 @@
                 });
             };
             window.alert('保存成功,请开始标注下一个政策文件');
-            $.ajax({
-                    async:false,
-                    cache: false,
-                    type:'POST',
-                    url:"/tagging/",
-                    data:{},
-                    dataType: "json",
-                    success:function(msg){
-                        if (msg) {//根据返回值进行跳转
-                            window.location.href = '/tagging/';
-                        }
-                    }
-                });
+            window.location.reload();//刷新当前页面.
         });
 
     </script>

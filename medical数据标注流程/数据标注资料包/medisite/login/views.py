@@ -184,7 +184,7 @@ def policy_tagging(request):
             now_id = id_no[0]
 
         else:
-            return render(request, 'tag.html', {'nowtext_id': '您已完成全部标注任务！'})
+            return render(request, 'policy_complete.html')
 
     nowtext0 = models.PolicySentence.objects.filter(example_id=now_id)
     cutted_text = [i.sentence for i in nowtext0]  # cutsent(nowtext)
