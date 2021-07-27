@@ -30,19 +30,6 @@ from django.conf.urls import url
 from login import views
 
 urlpatterns = [
-    path('example1/',views.example1),
-    path('example2/', views.example2),
-    path('example3/', views.example3),
-    path('logout/', views.logout),
-    # path('tagnext/', views.tagnext),
-
-    path('report/',views.report),
-    path('savereport/', views.savereport),
-
-    path('lookandmodify1/',views.lookandmodify1),
-    path('ajaxmethod/', views.ajaxmethod),
-
-    # TODO
     path('admin/', admin.site.urls),
     path('', views.taghome),
     path('login/',views.policy_login),
@@ -52,4 +39,9 @@ urlpatterns = [
     path('check/', views.check),
     path('lookandmodify/', views.lookandmodify),
     path('modifytag/', views.modifytag),
+
+    path('example1/', views.example1),
+    path('example2/', views.example2),
+    path('example3/', views.example3),
+    path('logout/', views.logout),
 ]

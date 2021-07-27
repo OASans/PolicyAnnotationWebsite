@@ -16,7 +16,7 @@ class User(models.Model):
 
 
 class LabelClass(models.Model):
-    labelid = models.IntegerField(verbose_name='BIO类别')
+    labelid = models.AutoField(verbose_name='BIO类别', unique=True,primary_key=True)
     labelmeaning = models.TextField(verbose_name='BIO含义')
 
     def __str__(self):
@@ -24,7 +24,7 @@ class LabelClass(models.Model):
 
 
 class ActClass(models.Model):
-    aid = models.TextField(verbose_name='类别id')
+    aid = models.AutoField(verbose_name='类别id',unique=True,primary_key=True)
     actid = models.TextField(verbose_name='文本类别')
 
     def __str__(self):
