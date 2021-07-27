@@ -48,13 +48,11 @@ urlpatterns = [
     path('savetag/', views.savetag),
     path('modifytag/', views.modifytag),
 
-    path('taglogistic/',views.taglogistic),
     path('check1/',views.check_report),
     path('lookandmodify1/',views.lookandmodify1),
     path('ajaxmethod/', views.ajaxmethod),
 
     path('login/',views.policy_login),
-    # path('tagging/', views.tagging),
     # TODO
     path('tagging/', views.policy_tagging),
 ]

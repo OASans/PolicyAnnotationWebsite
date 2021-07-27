@@ -274,11 +274,21 @@
                         console.log(data);
                     }
                 });
-
             };
             window.alert('保存成功,请开始标注下一个政策文件');
-
-
+            $.ajax({
+                    async:false,
+                    cache: false,
+                    type:'POST',
+                    url:"/tagging/",
+                    data:{},
+                    dataType: "json",
+                    success:function(msg){
+                        if (msg) {//根据返回值进行跳转
+                            window.location.href = '/tagging/';
+                        }
+                    }
+                });
         });
 
     </script>
