@@ -113,6 +113,7 @@
 
                                                 {% for sentence in whole_policy %}
                                                     {{ sentence }}<br />
+                                                    <br/>
                                                 {% endfor %}
                                             </p>
                                         </div>
@@ -165,11 +166,13 @@
 
                                             {%for ii,default in l.items%}
                                                 <td id = "bio_{{k}}">
-                                                    <select id='BIO_{{k}}_{{ii}}' name="section2" style="width:50px">
+                                                    <select id='BIO_{{k}}_{{ii}}' name="section2" style="width:105px">
 {#                                                        <option value="*">{{default}}</option>#}
                                                         {%for sec in sections_BIO%}
                                                             {% if default == sec.1 %}
                                                                 <option value="{{sec.0}}" selected="selected">{{sec.1}}</option>
+                                                            {% elif sec.1 == 'O' %}
+                                                                <option value="{{sec.0}}" selected="selected">{{sec.1}}>{{sec.1}}</option>
                                                             {% else %}
                                                                 <option value="{{sec.0}}">{{sec.1}}</option>
                                                             {% endif %}

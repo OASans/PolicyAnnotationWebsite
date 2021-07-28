@@ -192,9 +192,9 @@ def policy_tagging(request):
 
     label = []
     for i in nowtext0:
-        label.append(['0'] * len(i.sentence))
+        label.append(['1'] * len(i.sentence))
 
-    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[int(j)] for j in i])) for i in label]
+    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[j] for j in i])) for i in label]
     acts = ['请选择类别' for i in nowtext0]
     cutted = zip(uid, cutted_text, acts, lenpos)
 
@@ -254,7 +254,7 @@ def lookandmodify(request):
             add_ = []
         label.append(add_)
 
-    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[int(j)] for j in i])) for i in label]
+    lenpos = [dict(zip(range(1, len(i) + 1), [bio_dict[j] for j in i])) for i in label]
 
     acts = [i.sentence_tag for i in TagData]
 

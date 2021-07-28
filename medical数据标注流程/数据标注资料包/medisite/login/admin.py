@@ -27,7 +27,7 @@ class LabelClassAdmin(admin.ModelAdmin):
 
 @admin.register(ActClass)
 class ActClassAdmin(admin.ModelAdmin):
-    list_display = ['id','aid','actid']
+    list_display = ['aid','actid']
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
