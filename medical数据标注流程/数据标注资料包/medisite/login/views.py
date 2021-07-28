@@ -158,22 +158,27 @@ def policy_tagging(request):
     userstart = models.PolicyTagger.objects.get(id=reviewerid).start
     topid = models.PolicyTagger.objects.get(id=reviewerid).end  # end 是example_id
 
-    # 判断该用户是否已有标注记录。
-    # 如果没有，则从start开始标注。
-    # 如果有，判断是否ajax，如果是，则接着last_textid从POST.get 获得；如果不是，last_texid从lasttext获得
-    # 判断是否标注任务全部完成。
-    # 如果
     if not text_exist:  # 尚未开始标注
         now_id = userstart
 
     else:  # 已有标注记录
         # 得到已标记的exampid 在 dia_act 中的index
         id_exist = [i.example_id for i in lasttext]
-        # for text in lasttext:
-        #     eid = int(text.example_id)
-        #     id_exist.append(eid)
-        # id_exist = set(id_exist) # 选择出有bio标记的
+        id_nopermission = [i.example_id for i in lasttext if (i.permissions==None and i.sentence_tag=='准入条件')]
+
         id_exist_set = set(id_exist)
+        id_nopermission_set = set(id_nopermission)
+        if list(id_nopermission_set) != []:
+            example_id = list(id_nopermission_set)[0]
+            tag_info = models.PolicySentenceTag.objects.filter(example_id=example_id, reviewer=reviewerid,
+                                                               sentence_tag='准入条件')
+            sentences = [tag.sentence for tag in tag_info]
+            uids = [tag.unique_id for tag in tag_info]
+            permission_sentences = zip(uids, sentences)
+            return render(request, 'policy_permission.html', {
+                'message': '以下为您选择的准入条件句子，请开始标注四元组',
+                'nowtext_id': example_id, 'permission_sentence': permission_sentences})
+
         id_all = [i for i in policy_ids[policy_ids.index(userstart): policy_ids.index(topid) + 1]]
         id_no = []
         for eid in id_all:
@@ -182,9 +187,8 @@ def policy_tagging(request):
 
         if id_no != []:
             now_id = id_no[0]
-
         else:
-            return render(request, 'policy_complete.html')
+            return render(request, 'policy_complete.html', {'message': '您已完成当前所有标注任务', 'from': 'tag'})
 
     nowtext0 = models.PolicySentence.objects.filter(example_id=now_id)
     cutted_text = [i.sentence for i in nowtext0]  # cutsent(nowtext)
@@ -199,9 +203,10 @@ def policy_tagging(request):
     cutted = zip(uid, cutted_text, acts, lenpos)
 
     whole_policy = models.PolicyText.objects.get(example_id=now_id).text
-    return render(request, 'policy_tag.html', {'whole_policy': whole_policy,
+    return render(request, 'new_policy_tag.html', {'whole_policy': whole_policy,
                                         'nowtext_id': now_id, 'cutted': cutted, 'sections_BIO': res1,
                                         'sections_ACT': res2, 'lenpos': lenpos})
+    # TODO：换了新的tagging页面
 
 
 def logout(request):
@@ -355,3 +360,88 @@ def savetag(request):
     return HttpResponse(json.dumps({"msg": 'success'}))
 
 
+@csrf_exempt
+def savepermissions(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+
+    if request.is_ajax():
+        nowtextid = request.POST.get('nowtextid', None)
+        objects = request.POST.get('objects', None)
+        vars = request.POST.get('vars', None)
+        relations = request.POST.get('relations', None)
+        fields = request.POST.get('fields', None)
+
+    unique_id = str(nowtextid)
+    data_tagged = models.PolicySentenceTag.objects.get(unique_id=unique_id)
+
+    objects = objects.strip().split(' ')
+    vars = vars.strip().split(' ')
+    relations = relations.strip().split(' ')
+    fields = fields.strip().split(' ')
+    permissions = []
+    for o,v,r,f in zip(objects, vars, relations, fields):
+        permissions.append((o,v,r,f))
+
+    # add_data = {'permissions': permissions}
+    # data_tagged.update(**add_data)
+    data_tagged.permissions = permissions
+    data_tagged.save(update_fields=['permissions'])
+
+    return HttpResponse(json.dumps({"msg": 'success'}))
+
+
+@csrf_exempt
+def permission(request):
+    if not request.session.get('is_login', None):
+        # 如果本来就未登录，也就没有登出一说
+        return redirect("/login/")
+    reviewerid = request.session['userid']
+    if request.is_ajax():
+        example_id = request.POST.get('textid', None)
+        tag_info = models.PolicySentenceTag.objects.filter(example_id=example_id, reviewer=reviewerid,
+                                                           sentence_tag='准入条件')
+    else:
+        # 先确定标注用户，此时标注内容
+        lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid, sentence_id=1).order_by('-savedate')
+        text_exist = lasttext.exists()
+        userstart = models.PolicyTagger.objects.get(id=reviewerid).start
+        topid = models.PolicyTagger.objects.get(id=reviewerid).end
+        if not text_exist:
+            message = "您尚未开始标注!"
+            return render(request, 'policy_permission.html', {'message': message})
+        else:
+            id_exist = []
+            for text in lasttext:
+                if text.permissions != None:
+                    id_exist.append(text.example_id)
+            id_exist = set(id_exist)
+
+            id_all = set([i for i in policy_ids[policy_ids.index(userstart): policy_ids.index(topid) + 1]])
+            id_no = id_all - id_exist
+
+            id_no = list(id_no)
+            # print('id_no:',id_no)
+            if id_no != []:
+                example_id = id_no[0]
+                tag_info = models.PolicySentenceTag.objects.filter(example_id=example_id, reviewer=reviewerid,
+                                                                   sentence_tag='准入条件')
+            else:
+                return render(request, 'policy_complete.html', {'message': '您已完成当前所有准入条件四元组标注！', 'from': 'permission'})
+
+    if not tag_info.exists():
+                    return render(request, 'policy_complete.html', {'message': '您已完成当前所有准入条件四元组标注！', 'from': 'permission'})
+    search_dict = dict()
+    if example_id:
+        search_dict['example_id'] = example_id
+    if reviewerid:
+        search_dict['reviewer'] = reviewerid
+
+    sentences = [tag.sentence for tag in tag_info]
+    uids = [tag.unique_id for tag in tag_info]
+
+    permission_sentences = zip(uids, sentences)
+
+    return render(request, 'policy_permission.html', {'message': '以下为您选择的准入条件句子，请开始标注四元组', 'nowtext_id': example_id,
+                                                      'permission_sentence': permission_sentences})

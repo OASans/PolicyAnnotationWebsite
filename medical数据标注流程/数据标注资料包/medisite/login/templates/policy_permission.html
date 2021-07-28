@@ -1,0 +1,236 @@
+{% load static %}
+
+<html lang="en">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>准入条件标注</title>
+    <title>准入条件标注</title>
+
+    <!-- ================= Favicon ================== -->
+    <!-- Standard -->
+    <link rel="shortcut icon" href="http://placehold.it/64.png/000/fff">
+    <!-- Retina iPad Touch Icon-->
+    <link rel="apple-touch-icon" sizes="144x144" href="http://placehold.it/144.png/000/fff">
+    <!-- Retina iPhone Touch Icon-->
+    <link rel="apple-touch-icon" sizes="114x114" href="http://placehold.it/114.png/000/fff">
+    <!-- Standard iPad Touch Icon-->
+    <link rel="apple-touch-icon" sizes="72x72" href="http://placehold.it/72.png/000/fff">
+    <!-- Standard iPhone Touch Icon-->
+    <link rel="apple-touch-icon" sizes="57x57" href="http://placehold.it/57.png/000/fff">
+
+    <!-- Styles -->
+    <link href="{% static 'css/lib/scrollable/scrollable.min.css' %}" rel="stylesheet">  <!--Themes Jquery Bar Rating-->
+    <link href="{% static 'fontAwesome/css/fontawesome-all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/lib/themify-icons.css' %}" rel="stylesheet">
+    <link href="{% static 'css/lib/mmc-chat.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/lib/sidebar.css' %}" rel="stylesheet">
+    <link href="{% static 'css/lib/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/lib/nixon.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/lobipanel/css/lobipanel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+
+
+
+
+</head>
+
+<body>
+
+    <div class="sidebar sidebar-hide-to-small sidebar-shrink sidebar-gestures">
+        <div class="nano">
+            <div class="nano-content">
+                <ul>
+                    <li><a  href="/index/"><i class="ti-home"></i> 首页 </a></li>
+
+                    <li><a href="/example1/"><i class="ti-layout-grid2-alt"></i>查看标注说明</a></li>
+                    <li><a href="/tagging/"><i class="ti-tag"></i> 标注主页面</a></li>
+
+                    <li class="active"><a href="/permission/"><i class="ti-pencil"></i> 准入条件标注</a></li>
+					<li><a href="/check/"><i class="ti-eye"></i>查看已标注文本</a></li>
+                    <li><a href="/logout/"><i class="ti-close"></i>登出</a></li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /# sidebar -->
+
+    <div class="header">
+        <div class="pull-left">
+            <div class="logo">
+                <a href="index.html">
+                    <img id="logoImg" src="{% static 'logo/logo.png'%}"  alt="FNLP-SDS" />
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-wrap">
+        <div class="main">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12 p-0">
+                        <div class="page-header">
+                            <div class="page-title">
+                                <h1>准入四元组标注</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# row -->
+                <div class="main-content" id="maincontent">
+                    <b>{{ message }}</b><br />
+                    <div class="row" id="updatediv" >
+
+                        <div class="col-lg-12" id="permission" style = "height:750px;overflow-y:auto;background: #ffffff">
+                            {%for uid, sent in permission_sentence%} <!-- k 是unique_id-->
+                                {% block main %}
+{#                                    <table class="table table-responsive" id="{{ uid }}" style= "width:300px;height:50px;">#}
+                                        <div id="permission_{{ uid }}">
+                                            <br/>
+                                            <p style=" font-size:20px" id="sentid_{{uid}}">
+                                                {{ uid }}: {{ sent }}
+                                            </p>
+                                            <button style="width:15%;margin:10px;float:right;" id="addpermission_{{ uid }}" class="btn btn-primary btn-flat m-b-30 m-t-30">增加一个四元组</button>
+                                            <form method="post" id="form_{{ uid }}">
+                                                <div style="border:1px solid #999;padding:3px;">
+                                                    <label>对象:
+                                                    <input type="text" class="form-control" name="object_{{ uid }}" placeholder="请从原文截取">
+                                                    </label>
+                                                    <label>变量:
+                                                    <input type="text" class="form-control" name="var_{{ uid }}" placeholder="请从原文截取">
+                                                    </label>
+                                                    <label>关系:
+                                                    <select class="form-control" name="relation_{{ uid }}">
+                                                        <option selected="selected">无四元组关系</option>
+                                                        <option>大于</option>
+                                                        <option>小于</option>
+                                                        <option>等于</option>
+                                                        <option>属于</option>
+                                                        <option>包含</option>
+                                                    </select>
+                                                    </label>
+                                                    <label>域:
+                                                    <input type="text" class="form-control" name="field_{{ uid }}" placeholder="请从原文截取">
+                                                    </label>
+                                                </div>
+                                            </form>
+                                        </div>
+{#                                    </table>#}
+                                {% endblock main %}
+
+                            {% endfor %}
+
+
+                        </div>
+
+
+                    <div>
+                        <!-- <button style="width:15%;margin:10px;float:right;" id="next" class="btn btn-primary btn-flat m-b-30 m-t-30">下一条</button> -->
+                        <button style="width:15%;margin:10px;float:right;" id="savepermission" class="btn btn-primary btn-flat m-b-30 m-t-30">保存并标注下一篇政策</button>
+                    </div>
+
+                    </div>
+                </div>
+
+        </div>
+        <!-- /# container-fluid -->
+    </div>
+    </div>
+    <!-- /# main -->
+
+
+    <script src="{% static 'js/lib/jquery.min.js'%}"></script>
+    <!-- jquery vendor -->
+    <script src="{% static 'js/lib/jquery.nanoscroller.min.js'%}"></script>
+    <!-- nano scroller -->
+    <script src="{% static 'js/lib/sidebar.js'%}"></script>
+    <!-- sidebar -->
+    <script src="{% static 'js/lib/bootstrap.min.js'%}"></script>
+    <!-- bootstrap -->
+    <script src="{% static 'js/lib/mmc-common.js'%}"></script>
+    <script src="{% static 'js/lib/mmc-chat.js'%}"></script>
+
+    <script src="{% static 'js/lib/scrollable/holder.js'%}"></script><!-- scripit init-->
+    <script src="{% static 'js/lib/scrollable/jquery-asScrollbar.js'%}"></script><!-- scripit init-->
+    <script src="{% static 'js/lib/scrollable/jquery-asScrollable.min.js'%}"></script><!-- scripit init-->
+    <script src="{% static 'js/lib/scrollable/scrollable.init.js'%}"></script><!-- scripit init-->
+
+    <script src="{% static 'js/scripts.js'%}"></script> <!-- scripit init -->
+
+    <script>
+
+        $("button[id^='addpermission_']").on('click',function(){
+            var thisId = $(this).attr('id').substring(14);
+            $('#form_'+thisId).clone().attr('id', 'form_'+thisId).appendTo('#permission_'+thisId);
+            index++;
+        });
+
+
+        $(document).on('click','#savepermission',function(){
+            var all_sents = $("div[id^='permission_']");
+            var uid_num = all_sents.length;
+            var all_uids = [];
+
+            for (var k = 0; k < uid_num; k++){
+                all_uids[k] = all_sents[k].id.substring(11, 14);
+            }
+
+            for (var i = 0; i < uid_num; i++){
+                var all_objects = document.getElementsByName('object_'+all_uids[i]);
+                var all_vars = document.getElementsByName('var_'+all_uids[i]);
+                var all_relations = document.getElementsByName('relation_'+all_uids[i]);
+                var all_fields = document.getElementsByName('field_'+all_uids[i]);
+
+                var form_num = all_objects.length;
+                var objects = '';
+                var vars = '';
+                var relations = '';
+                var fields = '';
+                for (var j = 0; j < form_num; j++){
+                    objects = objects+all_objects[j].value+' ';
+                    vars = vars+all_vars[j].value+' ';
+                    relations = relations+all_relations[j].options[all_relations[j].selectedIndex].value+' ';
+                    fields = fields+all_fields[j].value+' ';
+                }
+
+                console.log(objects);
+                console.log(vars);
+                console.log(relations);
+                console.log(fields);
+
+                $.ajax({
+                    async:false,
+                    cache: false,
+                    type:'POST',
+                    url:"/savepermissions/",
+                    data:{'nowtextid':all_uids[i],'objects':objects,'vars':vars, 'relations':relations, 'fields': fields},
+                    dataType: "json",
+                    success:function(data){
+                        console.log(data);
+                    }
+                });
+
+            }
+
+            window.alert('保存成功,请开始标注下一篇政策');
+            parent.location.href ='/tagging/'
+
+
+        });
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>

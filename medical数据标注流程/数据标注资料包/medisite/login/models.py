@@ -72,6 +72,8 @@ class PolicySentenceTag(models.Model):
     sentence_tag = models.CharField(verbose_name='句子类别', max_length=128, default='其他', null=True)
     label = models.CharField(verbose_name='BIO标签', max_length=300,null=True)
 
+    permissions = models.JSONField(verbose_name='准入条件', null=True)
+
     reviewer = models.IntegerField(verbose_name='标注者id')
     savedate = models.DateTimeField('保存日期', auto_now=True)
 

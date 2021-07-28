@@ -44,4 +44,7 @@ urlpatterns = [
     path('example2/', views.example2),
     path('example3/', views.example3),
     path('logout/', views.logout),
+
+    path('permission/', views.permission),
+    path('savepermissions/', views.savepermissions),
 ]

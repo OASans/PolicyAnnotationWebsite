@@ -66,7 +66,7 @@ class PolicySentenceAdmin(admin.ModelAdmin):
 
 @admin.register(PolicySentenceTag)
 class PolicySentenceTagAdmin(admin.ModelAdmin):
-    list_display = ['id', 'example_id', 'unique_id', 'sentence_id', 'sentence', 'sentence_tag', 'label', 'reviewer',
+    list_display = ['id', 'example_id', 'unique_id', 'sentence_id', 'sentence', 'sentence_tag', 'label', 'permissions', 'reviewer',
                     'savedate']
     search_fields = ['reviewer']
     list_per_page = 20
