@@ -365,7 +365,7 @@ def savepermissions(request):
     if not request.session.get('is_login', None):
         # 如果本来就未登录，也就没有登出一说
         return redirect("/login/")
-
+    userid = request.session['userid']
     if request.is_ajax():
         nowtextid = request.POST.get('nowtextid', None)
         objects = request.POST.get('objects', None)
@@ -374,7 +374,7 @@ def savepermissions(request):
         fields = request.POST.get('fields', None)
 
     unique_id = str(nowtextid)
-    data_tagged = models.PolicySentenceTag.objects.get(unique_id=unique_id)
+    data_tagged = models.PolicySentenceTag.objects.get(unique_id=unique_id, reviewer=userid)
 
     objects = objects.strip().split(' ')
     vars = vars.strip().split(' ')

@@ -64,7 +64,7 @@ class PolicySentence(models.Model):
 class PolicySentenceTag(models.Model):
     id = models.AutoField(verbose_name='记录序号', unique=True, primary_key=True)
     example_id = models.IntegerField(verbose_name='政策序号')
-    unique_id = models.CharField(verbose_name='政策句子序号', max_length=20, unique=True)
+    unique_id = models.CharField(verbose_name='政策句子序号', max_length=20)
     sentence_id = models.IntegerField(verbose_name='句子序号')
 
     sentence = models.TextField(verbose_name='句子文本', null=True)
