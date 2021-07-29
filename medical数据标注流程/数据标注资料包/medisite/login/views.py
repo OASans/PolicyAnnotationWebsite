@@ -152,7 +152,7 @@ def policy_tagging(request):
     # 先确定标注用户，此时标注内容
     reviewerid = request.session['userid']
     # print('reviewerid:',reviewerid)
-    lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid, sentence_id=1).order_by('-savedate')
+    lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid).order_by('-savedate')
     text_exist = lasttext.exists()
 
     userstart = models.PolicyTagger.objects.get(id=reviewerid).start
@@ -406,33 +406,33 @@ def permission(request):
         example_id = request.POST.get('textid', None)
         tag_info = models.PolicySentenceTag.objects.filter(example_id=example_id, reviewer=reviewerid,
                                                            sentence_tag='准入条件')
-    else:
-        # 先确定标注用户，此时标注内容
-        lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid, sentence_id=1).order_by('-savedate')
-        text_exist = lasttext.exists()
-        userstart = models.PolicyTagger.objects.get(id=reviewerid).start
-        topid = models.PolicyTagger.objects.get(id=reviewerid).end
-        if not text_exist:
-            message = "您尚未开始标注!"
-            return render(request, 'policy_complete.html', {'message': message, 'from': 'no_tag'})
-        else:
-            id_exist = []
-            for text in lasttext:
-                if text.permissions != None:
-                    id_exist.append(text.example_id)
-            id_exist = set(id_exist)
-
-            id_all = set([i for i in policy_ids[policy_ids.index(userstart): policy_ids.index(topid) + 1]])
-            id_no = id_all - id_exist
-
-            id_no = list(id_no)
-            # print('id_no:',id_no)
-            if id_no != []:
-                example_id = id_no[0]
-                tag_info = models.PolicySentenceTag.objects.filter(example_id=example_id, reviewer=reviewerid,
-                                                                   sentence_tag='准入条件')
-            else:
-                return render(request, 'policy_complete.html', {'message': '您已完成当前所有准入条件四元组标注！', 'from': 'permission'})
+    # else:
+    #     # 先确定标注用户，此时标注内容
+    #     lasttext = models.PolicySentenceTag.objects.filter(reviewer=reviewerid, sentence_id=1).order_by('-savedate')
+    #     text_exist = lasttext.exists()
+    #     userstart = models.PolicyTagger.objects.get(id=reviewerid).start
+    #     topid = models.PolicyTagger.objects.get(id=reviewerid).end
+    #     if not text_exist:
+    #         message = "您尚未开始标注!"
+    #         return render(request, 'policy_complete.html', {'message': message, 'from': 'no_tag'})
+    #     else:
+    #         id_exist = []
+    #         for text in lasttext:
+    #             if text.permissions != None:
+    #                 id_exist.append(text.example_id)
+    #         id_exist = set(id_exist)
+    #
+    #         id_all = set([i for i in policy_ids[policy_ids.index(userstart): policy_ids.index(topid) + 1]])
+    #         id_no = id_all - id_exist
+    #
+    #         id_no = list(id_no)
+    #         # print('id_no:',id_no)
+    #         if id_no != []:
+    #             example_id = id_no[0]
+    #             tag_info = models.PolicySentenceTag.objects.filter(example_id=example_id, reviewer=reviewerid,
+    #                                                                sentence_tag='准入条件')
+    #         else:
+    #             return render(request, 'policy_complete.html', {'message': '您已完成当前所有准入条件四元组标注！', 'from': 'permission'})
 
     if not tag_info.exists():
                     return render(request, 'policy_complete.html', {'message': '您已完成当前所有准入条件四元组标注！', 'from': 'permission'})
@@ -444,7 +444,6 @@ def permission(request):
 
     sentences = [tag.sentence for tag in tag_info]
     uids = [tag.unique_id for tag in tag_info]
-
     permission_sentences = zip(uids, sentences)
 
     return render(request, 'policy_permission.html', {'message': '以下为您选择的准入条件句子，请开始标注四元组', 'nowtext_id': example_id,
