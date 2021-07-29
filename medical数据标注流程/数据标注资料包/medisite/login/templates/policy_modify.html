@@ -59,9 +59,9 @@
             <div class="nano-content">
                 <ul>
 
-                    <li><a  href="/index/"><i class="ti-home"></i> 首页 </a></li>
+                    <li><a  href="/index/"><i class="ti-home"></i>首页</a></li>
                     <li><a href="/example1/"><i class="ti-layout-grid2-alt"></i>查看标注说明</a></li>
-                    <li><a href="/tagging/"><i class="ti-tag"></i> 标注主页面</a></li>
+                    <li><a href="/tagging/"><i class="ti-tag"></i>标注主页面</a></li>
 {#                    <li><a href="/permission/"><i class="ti-pencil"></i> 准入条件标注</a></li>#}
 					<li class="active"><a href="/check/"><i class="ti-eye"></i>查看已标注文本</a></li>
 
@@ -109,10 +109,11 @@
                                     <div class="example box" data-options='{"direction": "vertical", "contentSelector": ">", "containerSelector": ">"}' style="overflow-y: auto">
                                         <div id="policy">
                                             <p style=" font-size:16px">
-                                                <b>政策原文：</b><br />
+                                                  <b style="font-size:20px">政策原文：</b><br />
+                                                <br/>
 
-                                                {% for sentence in whole_policy %}
-                                                    {{ sentence }}<br />
+                                                 {% for id, sentence in whole_policy %}
+                                                    <b>{{ id }}:</b>    {{ sentence }}<br />
                                                     <br/>
                                                 {% endfor %}
                                             </p>
@@ -132,7 +133,7 @@
 
                                     <thead>
                                         <tr style="height:10px">
-                                            <th id='uid' scope="row" >{{k}}</th>
+                                            <th id='uid' scope="row" ><b>{{k}}</b></th>
                                             {%for ii,default in l.items%}
                                                 <th >{{ii}}</th>
                                             {% endfor %}

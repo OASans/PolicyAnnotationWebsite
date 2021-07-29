@@ -203,6 +203,8 @@ def policy_tagging(request):
     cutted = zip(uid, cutted_text, acts, lenpos)
 
     whole_policy = models.PolicyText.objects.get(example_id=now_id).text
+    whole_policy_id = list(range(1,len(whole_policy)+1))
+    whole_policy = zip(whole_policy_id, whole_policy)
     return render(request, 'new_policy_tag.html', {'whole_policy': whole_policy,
                                         'nowtext_id': now_id, 'cutted': cutted, 'sections_BIO': res1,
                                         'sections_ACT': res2, 'lenpos': lenpos})
@@ -266,6 +268,8 @@ def lookandmodify(request):
     cutted = zip(uid, cutted_text, acts, lenpos)
 
     whole_policy = models.PolicyText.objects.get(example_id=eid).text
+    whole_policy_id = list(range(1, len(whole_policy) + 1))
+    whole_policy = zip(whole_policy_id, whole_policy)
 
     return render(request, 'policy_modify.html', {'whole_policy': whole_policy,
                                                'nowtext_id': eid, 'cutted': cutted, 'sections_BIO': res1,
