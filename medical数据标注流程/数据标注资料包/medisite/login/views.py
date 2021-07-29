@@ -410,7 +410,7 @@ def permission(request):
         topid = models.PolicyTagger.objects.get(id=reviewerid).end
         if not text_exist:
             message = "您尚未开始标注!"
-            return render(request, 'policy_permission.html', {'message': message})
+            return render(request, 'policy_complete.html', {'message': message, 'from': 'no_tag'})
         else:
             id_exist = []
             for text in lasttext:
