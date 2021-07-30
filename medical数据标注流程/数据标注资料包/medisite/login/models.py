@@ -43,7 +43,8 @@ class PolicyTagger(models.Model):
 
 
 class PolicyText(models.Model):
-    example_id = models.IntegerField(verbose_name='政策序号')
+    example_id = models.IntegerField(verbose_name='政策序号', unique=True)
+    origin_policy_id = models.IntegerField(verbose_name='原序号')
     text = models.JSONField(verbose_name='政策原文', null=True, default=[])
 
     def __str__(self):
